@@ -3,8 +3,8 @@ module Main where
 import Servant (Proxy (Proxy), Server, Application, serve, Handler)
 import Network.Wai.Handler.Warp (run)
 import Data.List (sortOn, sortBy)
-import ToDoHandlers
-import ToDoApi
+import ToDoHandlers ( toDoHandler )
+import ToDoApi ( ToDoApi )
 
 server :: Server ToDoApi
 server = toDoHandler
