@@ -6,6 +6,7 @@ import GHC.Generics (Generic)
 
 data ToDoItem = ToDoItem {
     description :: String,
-    isDone :: Bool,
-    dateCreated :: Day
+    id :: Int,
+    dateComplete :: Day,
+    isDone :: Bool
 } deriving (Eq, Show, Generic, Ord)

@@ -4,16 +4,20 @@ import ToDoApi (SortBy (..), ToDoItem(..))
 import Servant (Handler)
 import Data.List ( sortOn )
 import Data.Time ( fromGregorian )
+import Data.PostgresDataStore
+import Control.Monad.IO.Class
 
 toDoHandler :: Maybe SortBy -> Handler [ToDoItem]
-toDoHandler Nothing = return dummyToDoItems
+toDoHandler Nothing = liftIO getItems
 toDoHandler (Just s) = case s of
     IsDone -> return $ sortOn isDone dummyToDoItems
-    DateCreated -> return $ sortOn dateCreated dummyToDoItems
+    DateCreated -> return $ sortOn dateComplete dummyToDoItems
 
+getItems :: IO [ToDoItem]
+getItems = do
+    c <- conn
+    getAllToDoItems c
 
 dummyToDoItems :: [ToDoItem]
 dummyToDoItems =
-  [ ToDoItem "Buy dog Food" False (fromGregorian 1683  3 1)
-  , ToDoItem "Take out rubbish" True (fromGregorian 1905 12 1)
-  ]
+  [ ]
