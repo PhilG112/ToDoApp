@@ -1,4 +1,6 @@
 let
-    pkgs = import <nixpkgs> {};
+  pkgs = import <nixpkgs> { };
 in
-    pkgs.haskellPackages.callPackage ./project.nix { }
+  pkgs.haskellPackages.developPackage {
+    root = ./.;
+}

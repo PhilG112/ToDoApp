@@ -6,10 +6,8 @@
 module ToDoApi (
     ToDoApi
     , ToDoItem(..)
-    , dummyToDoItems
     , SortBy (IsDone, DateCreated)) where 
 
-import Data.Time.Calendar ( fromGregorian, Day )
 import Servant.API
 import GHC.Generics (Generic)
 import Data.Aeson
@@ -37,9 +35,3 @@ instance ToJSON ToDoItem
 type ToDoApi = "toDoItems"
     :> QueryParam "sortBy" SortBy
     :> Get '[JSON] [ToDoItem]
-
-dummyToDoItems :: [ToDoItem]
-dummyToDoItems =
-  [ ToDoItem "Buy dog Food" False (fromGregorian 1683  3 1)
-  , ToDoItem "Take out rubbish" True (fromGregorian 1905 12 1)
-  ]
