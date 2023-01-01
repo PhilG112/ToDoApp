@@ -28,7 +28,8 @@ executable ToDoApp-Api
         ToDoApi,
         Models.ToDoItemModel,
         Handlers.ToDoHandlers,
-        Data.PostgresDataStore
+        Data.PostgresDataStore,
+        Config.ConfigUtil
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:
     build-depends:
@@ -40,7 +41,8 @@ executable ToDoApp-Api
         warp,
         text,
         bytestring,
-        postgresql-simple
+        postgresql-simple,
+        config-ini
     hs-source-dirs:   src
     default-language: Haskell2010
 

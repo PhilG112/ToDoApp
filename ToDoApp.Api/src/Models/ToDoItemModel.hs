@@ -5,8 +5,9 @@ import Data.Time ( Day )
 import GHC.Generics (Generic)
 
 data ToDoItem = ToDoItem {
-    description :: String,
     id :: Int,
-    dateComplete :: Day,
-    isDone :: Bool
+    description :: String,
+    isDone :: Bool,
+    dateCreated :: Day,
+    dateComplete :: Day
 } deriving (Eq, Show, Generic, Ord)
