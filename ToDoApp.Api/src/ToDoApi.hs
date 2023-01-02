@@ -3,10 +3,7 @@
 {-# LANGUAGE InstanceSigs #-}
 {-# LANGUAGE OverloadedStrings #-}
 
-module ToDoApi (
-    ToDoApi
-    , ToDoItem(..)
-    , SortBy (IsDone, DateCreated)) where 
+module ToDoApi where 
 
 import Servant.API
 import GHC.Generics (Generic)
@@ -14,6 +11,8 @@ import Data.Aeson
 import Data.Text
 import Data.ByteString
 import Models.ToDoItemModel
+import Models.ToDoItemResponse
+import Data.Int
 
 data SortBy = IsDone | DateCreated deriving (Eq)
 
@@ -30,8 +29,7 @@ instance FromHttpApiData SortBy where
         | s == "dateCreated" = Right DateCreated
         | otherwise = Left "Cannot sort by given parameter. 'isDone' or 'dateCreated' only."
 
-instance ToJSON ToDoItem
-
-type ToDoApi = "toDoItems"
-    :> QueryParam "sortBy" SortBy
-    :> Get '[JSON] [ToDoItem]
+type ToDoApi =
+         "toDoItems" :> QueryParam "sortBy" SortBy :> Get '[JSON] [ToDoItem]
+    :<|> "toDoItems" :> ReqBody '[JSON] ToDoItem :> Post '[JSON] ToDoItemResponse
+    :<|> "toDoItems" :> Capture "id" Int64 :> Get '[JSON] ToDoItem

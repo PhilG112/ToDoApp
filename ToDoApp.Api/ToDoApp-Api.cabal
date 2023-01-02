@@ -27,6 +27,7 @@ executable ToDoApp-Api
     other-modules:
         ToDoApi,
         Models.ToDoItemModel,
+        Models.ToDoItemResponse,
         Handlers.ToDoHandlers,
         Data.PostgresDataStore,
         Config.ConfigUtil

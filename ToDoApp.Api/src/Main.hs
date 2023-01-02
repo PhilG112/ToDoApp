@@ -1,13 +1,26 @@
 module Main where
 
-import Servant (Proxy (Proxy), Server, Application, serve, Handler)
+import Servant (Proxy (Proxy), Server, Application, serve, Handler, (:<|>) ((:<|>)))
 import Network.Wai.Handler.Warp (run)
 import Data.List (sortOn, sortBy)
-import Handlers.ToDoHandlers ( toDoHandler )
-import ToDoApi ( ToDoApi )
+import Handlers.ToDoHandlers ( getHandler, postHandler )
+import ToDoApi (SortBy, ToDoApi )
+import Data.PostgresDataStore ()
+import Models.ToDoItemModel ( ToDoItem )
+import Models.ToDoItemResponse ( ToDoItemResponse )
+import Data.Int
 
 server :: Server ToDoApi
-server = toDoHandler
+server = get :<|> post :<|> getById
+    where
+        get :: Maybe SortBy -> Handler [ToDoItem]
+        get = getHandler
+
+        post :: ToDoItem -> Handler ToDoItemResponse
+        post = postHandler
+
+        getById :: Int64 -> Handler ToDoItem
+        getById = getById
 
 toDoApi :: Proxy ToDoApi
 toDoApi = Proxy
