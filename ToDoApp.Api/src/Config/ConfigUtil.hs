@@ -7,6 +7,8 @@ import Data.Ini.Config
 import GHC.IO.IOMode ( IOMode(ReadMode) )
 import System.IO (openFile, hGetContents)
 import Data.Text
+import Control.Monad.Reader
+
 
 getConfig :: IO Config
 getConfig = do

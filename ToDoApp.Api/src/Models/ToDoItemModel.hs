@@ -10,6 +10,7 @@ import Data.Aeson ( ToJSON, FromJSON )
 import Database.PostgreSQL.Simple
 import Database.PostgreSQL.Simple.ToField
 import Database.PostgreSQL.Simple.ToRow (ToRow(..))
+import Control.Monad.Reader (ReaderT)
 
 data ToDoItem = ToDoItem {
     id :: Maybe Int,
