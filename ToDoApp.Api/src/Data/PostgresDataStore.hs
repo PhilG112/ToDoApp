@@ -30,12 +30,12 @@ insertToDoItem u = do
     xs :: [ToDoItemResponse] <- query c q u
     return $  head xs
 
-getById :: Int64 -> IO ToDoItem
+getById :: Int64 -> IO [ToDoItem]
 getById id = do
     cfg <- getConfig
     c <- conn cfg
     r :: [ToDoItem] <- query c "select * from todo_items where id = ?" (Only id)
-    return $ head r
+    return r
 
 getAllToDoItems :: Maybe SortBy -> IO [ToDoItem]
 getAllToDoItems s = do

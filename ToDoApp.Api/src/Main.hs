@@ -11,7 +11,7 @@ import Servant
       serve,
       Server,
       Handler,
-      Application )
+      Application, throwError, ServerError(..), err404)
 import ToDoApi ( ToDoApi, SortBy )
 import Models.ToDoItemModel ( ToDoItem )
 import Models.ToDoItemResponse ( ToDoItemResponse )
