@@ -6,7 +6,7 @@ import Data.Ini.Config
     ( fieldOf, number, parseIniFile, section, string, IniParser )
 import GHC.IO.IOMode ( IOMode(ReadMode) )
 import System.IO (openFile, hGetContents)
-import Data.Text
+import Data.Text ( pack )
 import Control.Monad.Reader
 
 

@@ -1,54 +1,98 @@
 {-# LANGUAGE DataKinds #-}
-{-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE ExplicitNamespaces #-}
+
 module Main where
 
-import Servant (Proxy (Proxy), Server, Application, serve, Handler, (:<|>) ((:<|>)), HasServer (ServerT), (:>), Get, JSON, Capture)
-import Network.Wai.Handler.Warp (run)
-import Data.List (sortOn, sortBy)
-import Handlers.ToDoHandlers ( getHandler, postHandler )
-import ToDoApi (SortBy, ToDoApi )
-import Models.ToDoItemModel ( ToDoItem (ToDoItem) )
+import Servant
+    ( Proxy(..),
+      type (:<|>)((:<|>)),
+      serve,
+      Server,
+      Handler,
+      Application )
+import ToDoApi ( ToDoApi, SortBy )
+import Models.ToDoItemModel ( ToDoItem )
 import Models.ToDoItemResponse ( ToDoItemResponse )
 import Data.Int ( Int64 )
-import Control.Monad.Reader ( ReaderT, MonadReader (ask), Reader, runReader, MonadIO (liftIO) )
-import Config.ConfigUtil (Config (databaseCfg), getConfig, DatabaseConfig (connString))
-import Database.PostgreSQL.Simple
-import qualified Data.Text as T
-import Data.Text.Encoding
+import Handlers.ToDoHandlers
+    ( getHandler, postHandler, getByIdHandler )
+import Network.Wai.Handler.Warp ( run )
 
-type RHandler env = ReaderT env Handler
+-- type ReaderAPI2 = "toDoItems" :> Capture "id" Int64  :> Get '[JSON] ToDoItem
 
-readerToHandler :: Reader (IO Config) a -> Handler a
-readerToHandler r = return (runReader r getConfig)
+-- readerAPI2 :: Proxy ReaderAPI2
+-- readerAPI2 = Proxy
 
-type ReaderAPI = "a" :> Capture "id" Int64 :>  Get '[JSON] ToDoItem
+-- funServerT :: ServerT ReaderAPI2 ((->) Config)
+-- funServerT = a where
+--     a :: Int64 -> Config -> ToDoItem
+--     a = getById
 
-readerAPI :: Proxy ReaderAPI
-readerAPI = Proxy
+--     -- unfortunately, we cannot make `String` the first argument.
+--     b :: Double -> Config -> Bool
+--     b _ s = True
 
-readerServerT :: ServerT ReaderAPI (Reader Config)
-readerServerT = getById'
-    where
-        getById' :: Int64 -> Reader Config ToDoItem
-        getById' i = do
-            cfg <- ask
-            return $ getById cfg i
+-- getById :: Int64 -> Config -> IO ToDoItem
+-- getById id cfg = do
+--     c <- conn cfg
+--     r :: [ToDoItem] <- query c "select * from todo_items where id = ?" (Only id)
+--     return $ head r
 
-getById :: Int64 -> Reader Config (IO ToDoItem)
-getById id = do
-    c2 <- conn c
-    r :: [ToDoItem] <- query c2 "select * form todo_items where id = ?" (Only id)
-    head r
+-- funToHandler :: (Config -> a) -> Handler a
+-- funToHandler f = do
+--     cfg <- liftIO getConfig
+--     return (f cfg)
 
-conn :: Config -> IO Connection
-conn c = do
-        let dbCfg = databaseCfg c
-        connectPostgreSQL (encodeUtf8 $ T.pack (connString dbCfg))
+-- app5 :: Application
+-- app5 = serve readerAPI2 (hoistServer readerAPI2 funToHandler funServerT)
 
-server :: Config -> Server ToDoApi
-server c = get :<|> post :<|> getById
+-- ---------------
+
+-- type ReaderAPI = "toDoItems" :> Capture "id" Int64  :> Get '[JSON] Int
+
+-- readerToHandler :: Reader Config a -> Handler a
+-- readerToHandler r = do
+--     cfg <- liftIO getConfig
+--     return (runReader r cfg)
+
+-- readerServer :: Server ReaderAPI
+-- readerServer = hoistServer readerAPI readerToHandler readerServerT
+
+-- readerAPI :: Proxy ReaderAPI
+-- readerAPI = Proxy
+
+-- readerServerT :: ServerT ReaderAPI (Reader Config)
+-- readerServerT = getById'
+--     where
+--         getById' :: Int64 -> Reader Config Int
+--         getById' i = 
+--             _
+
+-- getById :: Int64 -> Reader Config (IO Int)
+-- getById id = do
+--     cfg <- ask
+--     c2 <- liftIO $ conn cfg
+--     r :: [ToDoItem] <- liftIO $ query c2 "select * form todo_items where id = ?" (Only id)
+--     return 3
+
+-- conn :: Config -> IO Connection
+-- conn c = do
+--         let dbCfg = databaseCfg c
+--         connectPostgreSQL (encodeUtf8 $ T.pack (connString dbCfg))
+
+-- app2 :: Application
+-- app2 = serve readerAPI readerServer
+
+-- main2 :: IO ()
+-- main2 = do
+--     run 8081 app2
+
+-- ---------------------------------------------------
+
+server :: Server ToDoApi
+server = get :<|> post :<|> getById
     where
         get :: Maybe SortBy -> Handler [ToDoItem]
         get = getHandler
@@ -57,15 +101,14 @@ server c = get :<|> post :<|> getById
         post = postHandler
 
         getById :: Int64 -> Handler ToDoItem
-        getById = getById
+        getById = getByIdHandler
 
 toDoApi :: Proxy ToDoApi
 toDoApi = Proxy
 
-app ::Config ->  Application
-app c = serve toDoApi $ server c
+app :: Application
+app = serve toDoApi server 
 
 main :: IO ()
 main = do
-    cfg <- getConfig
-    run 8081 (app cfg) 
+    run 8081 app
