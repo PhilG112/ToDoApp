@@ -16,36 +16,50 @@ import Database.PostgreSQL.Simple.FromRow
 import Data.Int (Int64)
 import Data.ByteString (ByteString)
 import Config.ConfigUtil (getConfig, Config(..), DatabaseConfig(..))
-import Control.Monad.IO.Class
+import Control.Monad.IO.Class ( MonadIO(liftIO) )
 import Control.Monad (forM_)
-import Models.ToDoItemResponse
-import Models.ToDoItemModel
-import ToDoApi
+import Models.ToDoItemResponse ( ToDoItemResponse )
+import Models.ToDoItemModel ( ToDoItem )
+import ToDoApi ( SortBy(..) )
+import Control.Monad.Reader
+    ( MonadIO(liftIO), MonadReader(ask), ReaderT )
+import Servant (Handler)
 
-insertToDoItem :: ToDoItem -> IO ToDoItemResponse
+insertToDoItem :: ToDoItem -> ReaderT Config Handler ToDoItemResponse
 insertToDoItem u = do
-    cfg <- getConfig
-    c <- conn cfg
+    cfg <- ask
+    c <- liftIO $ conn cfg
     let q = "INSERT INTO todo_items (description, is_done, date_created, date_completed) VALUES (?, ?, ?, ?) returning id"
-    xs :: [ToDoItemResponse] <- query c q u
+    xs :: [ToDoItemResponse] <- liftIO $ query c q u
+    liftIO $ close c
     return $  head xs
 
-getById :: Int64 -> IO [ToDoItem]
+getById :: Int64 -> ReaderT Config Handler [ToDoItem]
 getById id = do
-    cfg <- getConfig
-    c <- conn cfg
-    r :: [ToDoItem] <- query c "select * from todo_items where id = ?" (Only id)
+    cfg <- ask
+    c <- liftIO $ conn cfg
+    r :: [ToDoItem] <- liftIO $ query c "select * from todo_items where id = ?" (Only id)
+    liftIO $ close c
     return r
 
-getAllToDoItems :: Maybe SortBy -> IO [ToDoItem]
+getAllToDoItems :: Maybe SortBy -> ReaderT Config Handler [ToDoItem]
 getAllToDoItems s = do
-    cfg <- getConfig
-    c <- conn cfg
+    cfg <- ask
+    c <- liftIO $ conn cfg
     case s of
-        Nothing -> query_ c "select * from todo_items"
+        Nothing -> do 
+            r <- liftIO $ query_ c "select * from todo_items"
+            liftIO $ close c
+            return r
         Just s -> case s of
-            IsDone -> query_ c "select * from todo_items order by is_done"
-            DateCreated -> query_ c "select * from todo_items order by date_created"
+            IsDone -> do 
+                r <- liftIO $ query_ c "select * from todo_items order by is_done"
+                liftIO $ close c
+                return r
+            DateCreated -> do
+                r <- liftIO $ query_ c "select * from todo_items order by date_created"
+                liftIO $ close c
+                return r
 
 conn :: Config -> IO Connection
 conn c = do

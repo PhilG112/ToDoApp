@@ -2,6 +2,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE ExplicitNamespaces #-}
+{-# LANGUAGE TypeOperators #-}
 
 module Main where
 
@@ -11,7 +12,7 @@ import Servant
       serve,
       Server,
       Handler,
-      Application, throwError, ServerError(..), err404)
+      Application, HasServer (ServerT), Capture, (:>), Get, JSON, hoistServer, QueryParam, ReqBody, Post )
 import ToDoApi ( ToDoApi, SortBy )
 import Models.ToDoItemModel ( ToDoItem )
 import Models.ToDoItemResponse ( ToDoItemResponse )
@@ -19,25 +20,35 @@ import Data.Int ( Int64 )
 import Handlers.ToDoHandlers
     ( getHandler, postHandler, getByIdHandler )
 import Network.Wai.Handler.Warp ( run )
+import Control.Monad.Reader
+    ( MonadIO(liftIO), ReaderT(runReaderT) )
+import Config.ConfigUtil ( Config, getConfig )
 
-server :: Server ToDoApi
-server = get :<|> post :<|> getById
+readerToHandler :: Config -> ReaderT Config Handler a -> Handler a
+readerToHandler cfg readerT = runReaderT readerT cfg
+    
+hoistedServer :: Config -> Server ToDoApi
+hoistedServer cfg = hoistServer toDoApiProxy (readerToHandler cfg) serverT
+
+toDoApiProxy :: Proxy ToDoApi
+toDoApiProxy = Proxy
+
+serverT :: ServerT ToDoApi (ReaderT Config Handler)
+serverT = get :<|> post :<|> getById
     where
-        get :: Maybe SortBy -> Handler [ToDoItem]
+        get :: Maybe SortBy -> ReaderT Config Handler [ToDoItem]
         get = getHandler
 
-        post :: ToDoItem -> Handler ToDoItemResponse
+        post :: ToDoItem -> ReaderT Config Handler ToDoItemResponse
         post = postHandler
 
-        getById :: Int64 -> Handler ToDoItem
+        getById :: Int64 -> ReaderT Config Handler ToDoItem
         getById = getByIdHandler
 
-toDoApi :: Proxy ToDoApi
-toDoApi = Proxy
-
-app :: Application
-app = serve toDoApi server 
+app :: Config -> Application
+app cfg = serve toDoApiProxy (hoistedServer cfg)
 
 main :: IO ()
 main = do
-    run 8081 app
+    cfg <- liftIO getConfig
+    run 8081 (app cfg)
