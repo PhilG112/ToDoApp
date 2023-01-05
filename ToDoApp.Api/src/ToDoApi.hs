@@ -6,13 +6,23 @@
 module ToDoApi where 
 
 import Servant.API
+    ( FromHttpApiData(parseQueryParam),
+      ToHttpApiData(toQueryParam),
+      type (:<|>),
+      type (:>),
+      QueryParam,
+      Get,
+      JSON,
+      ReqBody,
+      Post,
+      Capture )
 import GHC.Generics (Generic)
 import Data.Aeson
-import Data.Text
+import Data.Text ( Text )
 import Data.ByteString
-import Models.ToDoItemModel
-import Models.ToDoItemResponse
-import Data.Int
+import Models.ToDoItemModel ( ToDoItem )
+import Models.ToDoItemResponse ( ToDoItemResponse )
+import Data.Int ( Int64 )
 
 data SortBy = IsDone | DateCreated deriving (Eq)
 

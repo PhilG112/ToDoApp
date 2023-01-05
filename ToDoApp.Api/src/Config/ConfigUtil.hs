@@ -12,6 +12,7 @@ import Control.Monad.Reader
 
 getConfig :: IO Config
 getConfig = do
+    print "READING FILE...."
     handle <- openFile "config.dev.ini" ReadMode
     contents <- hGetContents handle
     case parseIniFile (pack contents) parseConfig of

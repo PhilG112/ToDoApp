@@ -6,18 +6,21 @@ import Data.List ( sortOn )
 import Data.Time ( fromGregorian )
 import Data.PostgresDataStore ( getAllToDoItems, insertToDoItem, getById )
 import Control.Monad.IO.Class ( MonadIO(liftIO) )
-import Models.ToDoItemModel
-import Models.ToDoItemResponse
-import Data.Int
-import Config.ConfigUtil
-import Database.PostgreSQL.Simple
+import Models.ToDoItemModel ( ToDoItem )
+import Models.ToDoItemResponse ( ToDoItemResponse )
+import Data.Int ( Int64 )
+import Config.ConfigUtil ( Config )
+import Database.PostgreSQL.Simple ()
+import Control.Monad.Reader ( MonadIO(liftIO), ReaderT )
 
-getHandler :: Maybe SortBy -> Handler [ToDoItem]
-getHandler Nothing = liftIO $ getAllToDoItems Nothing 
-getHandler (Just s) = liftIO $ getAllToDoItems (Just s)
+getHandler :: Maybe SortBy -> ReaderT Config IO [ToDoItem]
+getHandler Nothing =  getAllToDoItems Nothing 
+getHandler (Just s) = getAllToDoItems (Just s)
 
-postHandler :: ToDoItem -> Handler ToDoItemResponse
-postHandler i = liftIO $ insertToDoItem i
+postHandler :: ToDoItem -> ReaderT Config IO ToDoItemResponse
+postHandler = insertToDoItem
 
-getByIdHandler :: Int64 -> Handler ToDoItem
-getByIdHandler id = liftIO $ getById id
+getByIdHandler :: Int64 -> ReaderT Config IO ToDoItem
+getByIdHandler = getById
+
+
