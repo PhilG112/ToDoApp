@@ -2,7 +2,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE ExplicitNamespaces #-}
-{-# LANGUAGE TypeOperators #-}
 
 module Main where
 
@@ -50,5 +49,5 @@ app cfg = serve toDoApiProxy (hoistedServer cfg)
 
 main :: IO ()
 main = do
-    cfg <- liftIO getConfig
+    cfg <- getConfig
     run 8081 (app cfg)

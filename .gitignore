@@ -33,6 +33,7 @@ cabal.sandbox.config
 cabal.config
 *.ini
 
+
 # Stack
 .stack-work
 stack.yaml.lock
@@ -46,6 +47,9 @@ stack.yaml.lock
 *.chs.h
 *.prof
 .liquid/
+*.eventlog
+*.html
+*.hp
 
 # Agda
 *.agdai

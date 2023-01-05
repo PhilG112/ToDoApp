@@ -7,12 +7,11 @@ import Data.Ini.Config
 import GHC.IO.IOMode ( IOMode(ReadMode) )
 import System.IO (openFile, hGetContents)
 import Data.Text ( pack )
-import Control.Monad.Reader
+import Control.Monad.Reader ()
 
 
 getConfig :: IO Config
 getConfig = do
-    print "READING FILE...."
     handle <- openFile "config.dev.ini" ReadMode
     contents <- hGetContents handle
     case parseIniFile (pack contents) parseConfig of
