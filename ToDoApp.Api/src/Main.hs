@@ -24,26 +24,25 @@ import Control.Monad.Reader
     ( MonadIO(liftIO), ReaderT(runReaderT) )
 import Config.ConfigUtil ( Config, getConfig )
 
-readerToHandler :: Config -> ReaderT Config IO a -> Handler a
-readerToHandler cfg readerT = 
-    liftIO (runReaderT readerT cfg)
-
+readerToHandler :: Config -> ReaderT Config Handler a -> Handler a
+readerToHandler cfg readerT = runReaderT readerT cfg
+    
 hoistedServer :: Config -> Server ToDoApi
 hoistedServer cfg = hoistServer toDoApiProxy (readerToHandler cfg) serverT
 
 toDoApiProxy :: Proxy ToDoApi
 toDoApiProxy = Proxy
 
-serverT :: ServerT ToDoApi (ReaderT Config IO)
+serverT :: ServerT ToDoApi (ReaderT Config Handler)
 serverT = get :<|> post :<|> getById
     where
-        get :: Maybe SortBy -> ReaderT Config IO [ToDoItem]
+        get :: Maybe SortBy -> ReaderT Config Handler [ToDoItem]
         get = getHandler
 
-        post :: ToDoItem -> ReaderT Config IO ToDoItemResponse
+        post :: ToDoItem -> ReaderT Config Handler ToDoItemResponse
         post = postHandler
 
-        getById :: Int64 -> ReaderT Config IO ToDoItem
+        getById :: Int64 -> ReaderT Config Handler ToDoItem
         getById = getByIdHandler
 
 app :: Config -> Application

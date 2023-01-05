@@ -23,8 +23,9 @@ import Models.ToDoItemModel ( ToDoItem )
 import ToDoApi ( SortBy(..) )
 import Control.Monad.Reader
     ( MonadIO(liftIO), MonadReader(ask), ReaderT )
+import Servant (Handler)
 
-insertToDoItem :: ToDoItem -> ReaderT Config IO ToDoItemResponse
+insertToDoItem :: ToDoItem -> ReaderT Config Handler ToDoItemResponse
 insertToDoItem u = do
     cfg <- ask
     c <- liftIO $ conn cfg
@@ -33,15 +34,15 @@ insertToDoItem u = do
     liftIO $ close c
     return $  head xs
 
-getById :: Int64 -> ReaderT Config IO ToDoItem
+getById :: Int64 -> ReaderT Config Handler [ToDoItem]
 getById id = do
     cfg <- ask
     c <- liftIO $ conn cfg
     r :: [ToDoItem] <- liftIO $ query c "select * from todo_items where id = ?" (Only id)
     liftIO $ close c
-    return $ head r
+    return r
 
-getAllToDoItems :: Maybe SortBy -> ReaderT Config IO [ToDoItem]
+getAllToDoItems :: Maybe SortBy -> ReaderT Config Handler [ToDoItem]
 getAllToDoItems s = do
     cfg <- ask
     c <- liftIO $ conn cfg
