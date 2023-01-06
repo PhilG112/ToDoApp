@@ -11,13 +11,13 @@ import Servant
       serve,
       Server,
       Handler,
-      Application, HasServer (ServerT), Capture, (:>), Get, JSON, hoistServer, QueryParam, ReqBody, Post )
+      Application, HasServer (ServerT), Capture, (:>), Get, JSON, hoistServer, QueryParam, ReqBody, Post, NoContent (NoContent) )
 import ToDoApi ( ToDoApi, SortBy )
 import Models.ToDoItemModel ( ToDoItem )
 import Models.ToDoItemResponse ( ToDoItemResponse )
 import Data.Int ( Int64 )
 import Handlers.ToDoHandlers
-    ( getHandler, postHandler, getByIdHandler )
+    ( getHandler, postHandler, getByIdHandler, completeItemHandler )
 import Network.Wai.Handler.Warp ( run )
 import Control.Monad.Reader
     ( MonadIO(liftIO), ReaderT(runReaderT) )
@@ -33,7 +33,7 @@ toDoApiProxy :: Proxy ToDoApi
 toDoApiProxy = Proxy
 
 serverT :: ServerT ToDoApi (ReaderT Config Handler)
-serverT = get :<|> post :<|> getById
+serverT = get :<|> post :<|> getById :<|> completeItem
     where
         get :: Maybe SortBy -> ReaderT Config Handler [ToDoItem]
         get = getHandler
@@ -43,6 +43,9 @@ serverT = get :<|> post :<|> getById
 
         getById :: Int64 -> ReaderT Config Handler ToDoItem
         getById = getByIdHandler
+
+        completeItem :: Int64 -> ReaderT Config Handler NoContent
+        completeItem = completeItemHandler
 
 app :: Config -> Application
 app cfg = serve toDoApiProxy (hoistedServer cfg)

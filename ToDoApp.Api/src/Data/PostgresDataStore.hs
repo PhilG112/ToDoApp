@@ -1,7 +1,11 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 
-module Data.PostgresDataStore (insertToDoItem, getAllToDoItems, getById) where
+module Data.PostgresDataStore (
+    insertToDoItem,
+    getAllToDoItems,
+    getById,
+    completeItem) where
 
 import qualified Data.ByteString as B
 import qualified Data.Text as T
@@ -23,7 +27,7 @@ import Models.ToDoItemModel ( ToDoItem )
 import ToDoApi ( SortBy(..) )
 import Control.Monad.Reader
     ( MonadIO(liftIO), MonadReader(ask), ReaderT )
-import Servant (Handler)
+import Servant (Handler, NoContent (NoContent))
 
 insertToDoItem :: ToDoItem -> ReaderT Config Handler ToDoItemResponse
 insertToDoItem u = do
@@ -60,6 +64,16 @@ getAllToDoItems s = do
                 r <- liftIO $ query_ c "select * from todo_items order by date_created"
                 liftIO $ close c
                 return r
+
+completeItem :: Int64 -> ReaderT Config Handler (Maybe NoContent)
+completeItem id = do
+    cfg <- ask
+    c <- liftIO $ conn cfg
+    r <- liftIO $ execute c "update todo_items set is_done = true where id = ?" (Only id)
+    liftIO $ close c
+    if r == 0
+        then return Nothing
+        else return $ Just NoContent
 
 conn :: Config -> IO Connection
 conn c = do

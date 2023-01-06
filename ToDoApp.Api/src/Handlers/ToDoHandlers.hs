@@ -1,12 +1,16 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Handlers.ToDoHandlers (getHandler, postHandler, getByIdHandler)  where
+module Handlers.ToDoHandlers (
+    getHandler,
+    postHandler,
+    getByIdHandler,
+    completeItemHandler)  where
 
 import ToDoApi (SortBy (..))
-import Servant (Handler, ServerError (..), throwError, err404)
+import Servant (Handler, ServerError (..), throwError, err404, NoContent (NoContent))
 import Data.List ( sortOn )
 import Data.Time ( fromGregorian )
-import Data.PostgresDataStore ( getAllToDoItems, insertToDoItem, getById )
+import Data.PostgresDataStore ( getAllToDoItems, insertToDoItem, getById, completeItem )
 import Control.Monad.IO.Class ( MonadIO(liftIO) )
 import Models.ToDoItemModel ( ToDoItem )
 import Models.ToDoItemResponse ( ToDoItemResponse )
@@ -27,10 +31,11 @@ getByIdHandler id = do
     r <- getById id
     if length r > 0
         then return $ head r
-        else throwError custom404Error
-    where
-        custom404Error :: ServerError
-        custom404Error = err404 {
-            errHTTPCode = 404,
-            errReasonPhrase = "Not found.",
-            errBody = "No item found with that Id." }
+        else throwError err404
+
+completeItemHandler :: Int64 -> ReaderT Config Handler NoContent
+completeItemHandler id = do
+    r <- completeItem id
+    case r of
+        Nothing -> throwError err404
+        Just v -> return v

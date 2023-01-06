@@ -15,7 +15,7 @@ import Servant.API
       JSON,
       ReqBody,
       Post,
-      Capture )
+      Capture, Put, NoContent, PutNoContent )
 import GHC.Generics (Generic)
 import Data.Aeson
 import Data.Text ( Text )
@@ -43,3 +43,4 @@ type ToDoApi =
          "toDoItems" :> QueryParam "sortBy" SortBy :> Get '[JSON] [ToDoItem]
     :<|> "toDoItems" :> ReqBody '[JSON] ToDoItem :> Post '[JSON] ToDoItemResponse
     :<|> "toDoItems" :> Capture "id" Int64 :> Get '[JSON] ToDoItem
+    :<|> "toDoItems":> "complete" :> Capture "id" Int64 :> PutNoContent
