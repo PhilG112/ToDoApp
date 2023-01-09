@@ -3,7 +3,15 @@ module Main where
 import Criterion
 import Criterion.Main
 
-fib m
+fib = fastFib 1 1
+
+fastFib _ _ 0 = 0
+fastFib _ _ 1 = 1
+fastFib _ _ 2 = 1
+fastFib a b 3 = a + b
+fastFib a b c = fastFib (a + b) a (c - 1)
+
+slowFib m
     | m < 0 = error "negative"
     | otherwise = go m
     where
@@ -13,6 +21,6 @@ fib m
 
 main :: IO ()
 main = defaultMain [
-    bgroup "fib" [ bench "1" $ whnf fib 1
-                 , bench "50" $ whnf fib 50 ]
+    bgroup "fastFib" [ bench "20" $ whnf fib 1],
+    bgroup "slowFib" [ bench "20" $ whnf slowFib 1 ]
     ]

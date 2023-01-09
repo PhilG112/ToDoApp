@@ -5,3 +5,7 @@ test-show-details: streaming
 library-profiling: True
 executable-profiling: True
 benchmarks: True
+documentation: True
+package *
+  documentation: True
+haddock-html: True
