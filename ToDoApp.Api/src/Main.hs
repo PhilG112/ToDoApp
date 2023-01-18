@@ -23,15 +23,6 @@ import Control.Monad.Reader
     ( MonadIO(liftIO), ReaderT(runReaderT) )
 import Config.ConfigUtil ( Config, getConfig )
 
-readerToHandler :: Config -> ReaderT Config Handler a -> Handler a
-readerToHandler cfg readerT = runReaderT readerT cfg
-    
-hoistedServer :: Config -> Server ToDoApi
-hoistedServer cfg = hoistServer toDoApiProxy (readerToHandler cfg) serverT
-
-toDoApiProxy :: Proxy ToDoApi
-toDoApiProxy = Proxy
-
 serverT :: ServerT ToDoApi (ReaderT Config Handler)
 serverT = get :<|> post :<|> getById :<|> completeItem
     where
@@ -46,6 +37,15 @@ serverT = get :<|> post :<|> getById :<|> completeItem
 
         completeItem :: Int64 -> ReaderT Config Handler NoContent
         completeItem = completeItemHandler
+
+readerToHandler :: Config -> ReaderT Config Handler a -> Handler a
+readerToHandler cfg readerT = runReaderT readerT cfg
+    
+hoistedServer :: Config -> Server ToDoApi
+hoistedServer cfg = hoistServer toDoApiProxy (readerToHandler cfg) serverT
+
+toDoApiProxy :: Proxy ToDoApi
+toDoApiProxy = Proxy
 
 app :: Config -> Application
 app cfg = serve toDoApiProxy (hoistedServer cfg)
