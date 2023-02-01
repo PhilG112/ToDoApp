@@ -65,15 +65,13 @@ getAllToDoItems s = do
                 liftIO $ close c
                 return r
 
-completeItem :: Int64 -> ReaderT Config Handler (Maybe NoContent)
+completeItem :: Int64 -> ReaderT Config Handler (Maybe Int)
 completeItem id = do
     cfg <- ask
     c <- liftIO $ conn cfg
     r <- liftIO $ execute c "update todo_items set is_done = true where id = ?" (Only id)
     liftIO $ close c
-    if r == 0
-        then return Nothing
-        else return $ Just NoContent
+    return r
 
 conn :: Config -> IO Connection
 conn c = do

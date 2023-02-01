@@ -37,5 +37,5 @@ completeItemHandler :: Int64 -> ReaderT Config Handler NoContent
 completeItemHandler id = do
     r <- completeItem id
     case r of
-        Nothing -> throwError err404
-        Just v -> return v
+        0 -> throwError err404
+        v -> return NoContent
