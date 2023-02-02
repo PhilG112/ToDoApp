@@ -4,7 +4,7 @@ module Handlers.ToDoHandlers (
     getHandler,
     postHandler,
     getByIdHandler,
-    completeItemHandler)  where
+    completeItemHandler) where
 
 import ToDoApi (SortBy (..))
 import Servant (Handler, ServerError (..), throwError, err404, NoContent (NoContent))
@@ -37,5 +37,5 @@ completeItemHandler :: Int64 -> ReaderT Config Handler NoContent
 completeItemHandler id = do
     r <- completeItem id
     case r of
-        0 -> throwError err404
+        Nothing -> throwError err404
         v -> return NoContent

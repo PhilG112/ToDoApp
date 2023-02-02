@@ -27,7 +27,7 @@ import Models.ToDoItemModel ( ToDoItem )
 import ToDoApi ( SortBy(..) )
 import Control.Monad.Reader
     ( MonadIO(liftIO), MonadReader(ask), ReaderT )
-import Servant (Handler, NoContent (NoContent))
+import Servant (Handler)
 
 insertToDoItem :: ToDoItem -> ReaderT Config Handler ToDoItemResponse
 insertToDoItem u = do
@@ -65,13 +65,13 @@ getAllToDoItems s = do
                 liftIO $ close c
                 return r
 
-completeItem :: Int64 -> ReaderT Config Handler (Maybe Int)
+completeItem :: Int64 -> ReaderT Config Handler (Maybe Int64)
 completeItem id = do
     cfg <- ask
     c <- liftIO $ conn cfg
     r <- liftIO $ execute c "update todo_items set is_done = true where id = ?" (Only id)
     liftIO $ close c
-    return r
+    return (Just r)
 
 conn :: Config -> IO Connection
 conn c = do
