@@ -21,6 +21,6 @@ slowFib m
 
 main :: IO ()
 main = defaultMain [
-    bgroup "fastFib" [ bench "20" $ whnf fib 1],
+    bgroup "fastFibB" [ bench "20" $ whnf fib 1],
     bgroup "slowFib" [ bench "20" $ whnf slowFib 1 ]
     ]
