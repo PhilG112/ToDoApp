@@ -39,7 +39,7 @@ executable ToDoApp-Api
         --     -- -p = Generate a .prof
         --     -- -s = outputs report on gc
         --     -- -hy = Breaks down the graph by type. (https://downloads.haskell.org/~ghc/7.8.2/docs/html/users_guide/prof-heap.html)
-        --     -- -l-agu = esult in a significantly smaller eventlog as it will not include thread events. This makes a big difference for multi-threaded applications.
+        --     -- -l-agu = result in a significantly smaller eventlog as it will not include thread events. This makes a big difference for multi-threaded applications.
         --     -- -i0.1 = sets the sampling frequency of memory profiling to every tenth of a second.
         -- "-with-rtsopts=-N -p -s -hy -l-agu -i0.1"
     -- Modules included in this executable, other than Main.
